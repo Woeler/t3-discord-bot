@@ -21,7 +21,7 @@ exports.run = (client, message, args) => {
             var str = '';
             for (var i = 0; i < rows.length; i++) {
                 if (client.users.get(rows[i].user_id) !== undefined) {
-                    str += "#" + (i + 1) + ": `" + client.users.get(rows[i].user_id).toString() + "` with " + rows[i].beer_count + " beers.\n";
+                    str += "#" + (i + 1) + ": " + client.users.get(rows[i].user_id).tag + " with " + rows[i].beer_count + " beers.\n";
                 }
             }
             message.channel.send(str);
