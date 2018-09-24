@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `schedule_last_run` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT IGNORE INTO `schedule_last_run` (`id`, `name`, `last_run`) VALUES
-(1, `stackoverflow``, NOW());
+(1, 'stackoverflow', NOW());
 
 CREATE TABLE IF NOT EXISTS `typo3_blogs` (
   `id` int(11) NOT NULL,
