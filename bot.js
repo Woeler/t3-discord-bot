@@ -120,6 +120,7 @@ const l = schedule.scheduleJob('*/5 * * * *', function () {
 function fetchStackOverflow() {
     let parser = new Parser();
     var now = new Date();
+    var latestPost  = new Date();
 
     (async () => {
         let feed = await parser.parseURL('https://stackoverflow.com/feeds/tag/typo3');
@@ -150,6 +151,9 @@ function fetchStackOverflow() {
                                 }
                             }
                         });
+                        if (itemDate > latestPost) {
+                            latestPost = itemDate;
+                        }
                     }
 
                 }
@@ -157,7 +161,7 @@ function fetchStackOverflow() {
             });
         });
     })();
-    con.query("UPDATE schedule_last_run SET last_run = '" + now.toISOString() + "' WHERE name = 'stackoverflow'");
+    con.query("UPDATE schedule_last_run SET last_run = '" + latestPost.toISOString() + "' WHERE name = 'stackoverflow'");
 }
 
 function setMemberRoles(member, roles) {
