@@ -22,6 +22,16 @@ CREATE TABLE IF NOT EXISTS `beers` (
   `beer_count` int(11) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE `freezes` (
+  `id` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `status` tinyint(4) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO `freezes` (`id`, `name`, `status`) VALUES
+(1, 'feature', 0),
+(2, 'merge', 0);
+
 ALTER TABLE `schedule_last_run` ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `typo3_blogs` ADD PRIMARY KEY (`id`);
@@ -31,3 +41,5 @@ ALTER TABLE `schedule_last_run` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `typo3_blogs` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 ALTER TABLE `beers` ADD PRIMARY KEY (`user_id`);
+
+ALTER TABLE `freezes` ADD PRIMARY KEY (`id`);
