@@ -15,6 +15,20 @@ exports.run = (client, message, args) => {
         });
         return;
     }
+
+    if ('top10' === args[0].toLowerCase()) {
+        client.con.query("SELECT * FROM beers ORDER BY beer_count DESC LIMIT 10", function (err, rows, fields) {
+            var str = '';
+            for (var i = 0; i < rows.length; i++) {
+                if (client.users.get(rows[i].user_id) !== undefined) {
+                    str += "#" + (i + 1) + ": " + client.users.get(rows[i].user_id).toString() + " with " + rows[i].beer_count + " beers.\n";
+                }
+            }
+            message.channel.send(str);
+        });
+        return;
+    }
+
     var receiver = message.guild.members.get(args[0].replace(/[\\<>@#&!]/g, ""));
 
     if (undefined === receiver) {
