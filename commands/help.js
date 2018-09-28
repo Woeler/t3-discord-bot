@@ -4,6 +4,7 @@ exports.run = (client, message, args) => {
         embed: {
             color: client.config.colour,
             title: 'TYPO3 Bot Help',
+            description: '[Click here to go to the documentation](https://woeler.github.io/t3-discord-bot/)',
             fields: [
                 {
                     name: '!beer [user mention]',
