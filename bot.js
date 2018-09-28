@@ -179,10 +179,8 @@ function setMemberRoles(member, roles) {
  * Send the GmbH a reminder about the Daily
  */
 const m = new CronJob({
-    // Run at 05:00 Central time, only on weekdays
     cronTime: '00 59 9 * * 1-5',
     onTick: function() {
-        // Run whatever you like here..
         client.channels.get(config.generalChannelGmbh).send('@everyone It\'s daily time!');
     },
     start: true,
@@ -193,10 +191,8 @@ const m = new CronJob({
  * Send the GmbH a fun reminder how many days it has been since the last backend credentials phone call
  */
 const n = new CronJob({
-    // Run at 05:00 Central time, only on weekdays
     cronTime: '00 30 8 * * 1-5',
     onTick: function() {
-        // Run whatever you like here..
         con.query("SELECT * FROM statistics WHERE identifier = 'daysSinceGmbhLoginCredentialsCall' LIMIT 1", function (err, rows, fields) {
             if ((rows[0].value + 1) === 1) {
                 client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' day since the last call asking for backend login credentials!');
@@ -214,10 +210,8 @@ const n = new CronJob({
  * Fetch stackoverflow issues every 5 minutes
  */
 const o = new CronJob({
-    // Run at 05:00 Central time, only on weekdays
     cronTime: '00 */5 * * * *',
     onTick: function() {
-        // Run whatever you like here..
         fetchStackOverflow();
     },
     start: true,
@@ -228,10 +222,8 @@ const o = new CronJob({
  * Fetch blogs every 30 minutes
  */
 const p = new CronJob({
-    // Run at 05:00 Central time, only on weekdays
     cronTime: '00 */30 * * * *',
     onTick: function() {
-        // Run whatever you like here..
         fetchRssFeed('https://typo3.org/?type=100', 'typo3.org');
         fetchRssFeed('https://typo3.com/blog/tx_blog_feed/posts/recent/rss/posts.xml', 'typo3.com');
     },
