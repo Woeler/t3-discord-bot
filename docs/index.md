@@ -17,3 +17,8 @@ Here is a list of commands you can use with the T3 Discord bot:
 | !review [gerrit review number] | Returns review information (is also triggered when a gerrit link is posted). |
 | !version | Returns the latest LTS and stable release. |
 
+### Commands for Core Team only
+
+| Command  | Action |
+| ------------- | ------------- |
+| !freeze [type] [state] | Activate or cancel a freeze on features or merges. This will add a warning to all gerrit posts. (e.g. `!freeze feature true` or `!freeze merge false`) |
