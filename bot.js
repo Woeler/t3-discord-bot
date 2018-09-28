@@ -164,6 +164,17 @@ function fetchStackOverflow() {
     con.query("UPDATE schedule_last_run SET last_run = '" + latestPost.toISOString() + "' WHERE name = 'stackoverflow'");
 }
 
+const m = schedule.scheduleJob('30 6 * * *', function () {
+    con.query("SELECT * FROM statistics WHERE identifier = 'daysSinceGmbhLoginCredentialsCall' LIMIT 1", function (err, rows, fields) {
+        if ((rows[0].value + 1) === 1) {
+            client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' day since the last call asking for backend login credentials!');
+        } else {
+            client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' days since the last call asking for backend login credentials!');
+        }
+        con.query("UPDATE statistics SET value = value + 1 WHERE identifier = 'daysSinceGmbhLoginCredentialsCall'");
+    });
+});
+
 function setMemberRoles(member, roles) {
     var guild = client.guilds.get(typo3ServerId);
     for (var i = 0; i < roles.length; i++) {

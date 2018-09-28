@@ -32,6 +32,15 @@ INSERT INTO `freezes` (`id`, `name`, `status`) VALUES
 (1, 'feature', 0),
 (2, 'merge', 0);
 
+CREATE TABLE `statistics` (
+  `id` int(11) NOT NULL,
+  `identifier` varchar(255) NOT NULL,
+  `value` int(11) NOT NULL DEFAULT '0'
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO `statistics` (`id`, `identifier`, `value`) VALUES
+(1, 'daysSinceGmbhLoginCredentialsCall', 0);
+
 ALTER TABLE `schedule_last_run` ADD PRIMARY KEY (`id`);
 
 ALTER TABLE `typo3_blogs` ADD PRIMARY KEY (`id`);
@@ -43,3 +52,7 @@ ALTER TABLE `typo3_blogs` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 ALTER TABLE `beers` ADD PRIMARY KEY (`user_id`);
 
 ALTER TABLE `freezes` ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `statistics` ADD PRIMARY KEY (`id`);
+
+ALTER TABLE `statistics` MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
