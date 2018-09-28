@@ -1,3 +1,6 @@
+### TYPO3 Discord Server
+Join our Discord Server by clicking [here](https://discord.gg/TYPO3).
+
 ### Commands
 
 Here is a list of commands you can use with the T3 Discord bot:
