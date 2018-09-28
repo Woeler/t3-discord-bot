@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS `schedule_last_run` (
   `id` int(11) NOT NULL,
   `name` varchar(255) NOT NULL,
-  `last_run` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `last_run` datetime NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT IGNORE INTO `schedule_last_run` (`id`, `name`, `last_run`) VALUES

@@ -4,9 +4,9 @@ const Discord = require("discord.js");
 const Enmap = require("enmap");
 const fs = require("fs");
 const mysql = require("mysql");
-const schedule = require('node-schedule');
 const Parser = require('rss-parser');
 const ogs = require('open-graph-scraper');
+const CronJob = require('cron').CronJob;
 
 const client = new Discord.Client();
 const config = require("./config.json");
@@ -67,11 +67,6 @@ fs.readdir("./commands/", (err, files) => {
     });
 });
 
-const k = schedule.scheduleJob('*/30 * * * *', function () {
-    fetchRssFeed('https://typo3.org/?type=100', 'typo3.org');
-    fetchRssFeed('https://typo3.com/blog/tx_blog_feed/posts/recent/rss/posts.xml', 'typo3.com');
-});
-
 function fetchRssFeed(url, source, boot = false) {
     let parser = new Parser();
 
@@ -113,10 +108,6 @@ function fetchRssFeed(url, source, boot = false) {
     })();
 }
 
-const l = schedule.scheduleJob('*/5 * * * *', function () {
-    fetchStackOverflow();
-});
-
 function fetchStackOverflow() {
     let parser = new Parser();
     var now = new Date();
@@ -126,11 +117,12 @@ function fetchStackOverflow() {
         let feed = await parser.parseURL('https://stackoverflow.com/feeds/tag/typo3');
 
         con.query("SELECT * FROM schedule_last_run WHERE name = 'stackoverflow' LIMIT 1", function (err, rows, fields) {
-            var lastRun = Date.parse(rows[0].last_run);
+            var lastRun = new Date(Date.parse(rows[0].last_run));
+            latestPost = lastRun;
             feed.items.forEach(item => {
                 if (err) throw err;
                 if (rows.length === 1) {
-                    var itemDate = Date.parse(item.pubDate);
+                    var itemDate = new Date(Date.parse(item.pubDate));
                     if (itemDate > lastRun) {
                         client.channels.get(stackOverflowChannel).send({
                             embed: {
@@ -153,6 +145,7 @@ function fetchStackOverflow() {
                         });
                         if (itemDate > latestPost) {
                             latestPost = itemDate;
+                            con.query("UPDATE schedule_last_run SET last_run = '" + itemDate.toISOString() + "' WHERE name = 'stackoverflow'");
                         }
                     }
 
@@ -161,19 +154,7 @@ function fetchStackOverflow() {
             });
         });
     })();
-    con.query("UPDATE schedule_last_run SET last_run = '" + latestPost.toISOString() + "' WHERE name = 'stackoverflow'");
 }
-
-const m = schedule.scheduleJob('30 6 * * *', function () {
-    con.query("SELECT * FROM statistics WHERE identifier = 'daysSinceGmbhLoginCredentialsCall' LIMIT 1", function (err, rows, fields) {
-        if ((rows[0].value + 1) === 1) {
-            client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' day since the last call asking for backend login credentials!');
-        } else {
-            client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' days since the last call asking for backend login credentials!');
-        }
-        con.query("UPDATE statistics SET value = value + 1 WHERE identifier = 'daysSinceGmbhLoginCredentialsCall'");
-    });
-});
 
 function setMemberRoles(member, roles) {
     var guild = client.guilds.get(typo3ServerId);
@@ -187,3 +168,73 @@ function setMemberRoles(member, roles) {
         })
     }
 }
+
+/*--------------------------*/
+/**
+ * SCHEDULED JOBS
+ */
+/*--------------------------*/
+
+/**
+ * Send the GmbH a reminder about the Daily
+ */
+const m = new CronJob({
+    // Run at 05:00 Central time, only on weekdays
+    cronTime: '00 59 9 * * 1-5',
+    onTick: function() {
+        // Run whatever you like here..
+        client.channels.get(config.generalChannelGmbh).send('@everyone It\'s daily time!');
+    },
+    start: true,
+    timeZone: 'Europe/Berlin'
+});
+
+/**
+ * Send the GmbH a fun reminder how many days it has been since the last backend credentials phone call
+ */
+const n = new CronJob({
+    // Run at 05:00 Central time, only on weekdays
+    cronTime: '00 30 8 * * 1-5',
+    onTick: function() {
+        // Run whatever you like here..
+        con.query("SELECT * FROM statistics WHERE identifier = 'daysSinceGmbhLoginCredentialsCall' LIMIT 1", function (err, rows, fields) {
+            if ((rows[0].value + 1) === 1) {
+                client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' day since the last call asking for backend login credentials!');
+            } else {
+                client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' days since the last call asking for backend login credentials!');
+            }
+            con.query("UPDATE statistics SET value = value + 1 WHERE identifier = 'daysSinceGmbhLoginCredentialsCall'");
+        });
+    },
+    start: true,
+    timeZone: 'Europe/Berlin'
+});
+
+/**
+ * Fetch stackoverflow issues every 5 minutes
+ */
+const o = new CronJob({
+    // Run at 05:00 Central time, only on weekdays
+    cronTime: '00 * * * * *',
+    onTick: function() {
+        // Run whatever you like here..
+        fetchStackOverflow();
+    },
+    start: true,
+    timeZone: 'Europe/Berlin'
+});
+
+/**
+ * Fetch blogs every 30 minutes
+ */
+const p = new CronJob({
+    // Run at 05:00 Central time, only on weekdays
+    cronTime: '00 */30 * * * *',
+    onTick: function() {
+        // Run whatever you like here..
+        fetchRssFeed('https://typo3.org/?type=100', 'typo3.org');
+        fetchRssFeed('https://typo3.com/blog/tx_blog_feed/posts/recent/rss/posts.xml', 'typo3.com');
+    },
+    start: true,
+    timeZone: 'Europe/Berlin'
+});
