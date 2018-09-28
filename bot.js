@@ -215,7 +215,7 @@ const n = new CronJob({
  */
 const o = new CronJob({
     // Run at 05:00 Central time, only on weekdays
-    cronTime: '00 * * * * *',
+    cronTime: '00 */5 * * * *',
     onTick: function() {
         // Run whatever you like here..
         fetchStackOverflow();
