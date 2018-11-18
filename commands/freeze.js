@@ -25,7 +25,10 @@ exports.run = (client, message, args) => {
         var stateString = 'on';
     }
 
-    client.con.query("UPDATE freezes SET status = " + state + " WHERE name = " + client.con.escape(type));
+    client.pool.getConnection(function(err, con) {
+        con.query("UPDATE freezes SET status = " + state + " WHERE name = " + client.con.escape(type));
+        con.release();
+    });
 
     message.channel.send(message.author.toString() + " you have turned " + stateString + " " + type + " freeze.");
 };

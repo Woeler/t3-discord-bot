@@ -25,16 +25,19 @@ exports.run = (client, message, args) => {
             var review = arr[0];
             var description = '';
 
-            client.con.query("SELECT * FROM freezes", function (err, rows, fields) {
-                for (var i = 0; i < rows.length; i++) {
-                    if (rows[i].status === 1) {
-                        if (rows[i].name === 'feature' && review.subject.toString().toLocaleLowerCase().includes('[feature]')) {
-                            description += 'A ' + rows[i].name + " freeze is currently in effect.\n";
-                        } else if (rows[i].name !== 'feature') {
-                            description += 'A ' + rows[i].name + " freeze is currently in effect.\n";
+            client.pool.getConnection(function (err, con) {
+                con.query("SELECT * FROM freezes", function (err, rows, fields) {
+                    for (var i = 0; i < rows.length; i++) {
+                        if (rows[i].status === 1) {
+                            if (rows[i].name === 'feature' && review.subject.toString().toLocaleLowerCase().includes('[feature]')) {
+                                description += 'A ' + rows[i].name + " freeze is currently in effect.\n";
+                            } else if (rows[i].name !== 'feature') {
+                                description += 'A ' + rows[i].name + " freeze is currently in effect.\n";
+                            }
                         }
                     }
-                }
+                    con.release();
+                });
                 if (description !== '') {
                     description = "```" + description + "```";
                 }
