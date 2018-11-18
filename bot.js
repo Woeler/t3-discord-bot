@@ -18,11 +18,12 @@ const stackOverflowChannel = config.stackOverflowChannel;
 client.login(config.token);
 client.config = config;
 
-const con = mysql.createConnection({
+const con = mysql.createPool({
     "host": "localhost",
     "database": client.config.db,
     "user": client.config.db_user,
     "password": client.config.db_pass,
+    "connectionLimit": 3,
     "multipleStatements": true
 });
 
