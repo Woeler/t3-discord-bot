@@ -25,10 +25,18 @@ exports.run = (client, message, args) => {
         var stateString = 'on';
     }
 
-    client.pool.getConnection(function(err, con) {
+    const mysql = require('mysql');
+    const mysqlConfig = {
+        "host": "localhost",
+        "database": client.config.db,
+        "user": client.config.db_user,
+        "password": client.config.db_pass,
+        "multipleStatements": true
+    };
+    var con = mysql.createConnection(mysqlConfig);
+
         con.query("UPDATE freezes SET status = " + state + " WHERE name = " + client.con.escape(type));
-        con.release();
-    });
+        con.end();
 
     message.channel.send(message.author.toString() + " you have turned " + stateString + " " + type + " freeze.");
 };

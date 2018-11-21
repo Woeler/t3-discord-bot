@@ -18,16 +18,13 @@ const stackOverflowChannel = config.stackOverflowChannel;
 client.login(config.token);
 client.config = config;
 
-const pool = mysql.createPool({
+const mysqlConfig = {
     "host": "localhost",
     "database": client.config.db,
     "user": client.config.db_user,
     "password": client.config.db_pass,
-    "connectionLimit": 3,
     "multipleStatements": true
-});
-
-client.pool = pool;
+};
 
 client.on("ready", () => {
     client.user.setActivity('Install Tool');
@@ -70,7 +67,7 @@ fs.readdir("./commands/", (err, files) => {
 
 function fetchRssFeed(url, source, boot = false) {
     let parser = new Parser();
-    pool.getConnection(function(err, con) {
+    var con = mysql.createConnection(mysqlConfig);
         (async () => {
             let feed = await parser.parseURL(url);
 
@@ -106,16 +103,15 @@ function fetchRssFeed(url, source, boot = false) {
                 });
 
             });
+            con.end();
         })();
-        con.release();
-    });
 }
 
 function fetchStackOverflow() {
     let parser = new Parser();
     var now = new Date();
+    var con = mysql.createConnection(mysqlConfig);
     var latestPost  = new Date();
-    pool.getConnection(function(err, con) {
         (async () => {
             let feed = await parser.parseURL('https://stackoverflow.com/feeds/tag/typo3');
 
@@ -156,9 +152,8 @@ function fetchStackOverflow() {
 
                 });
             });
+            con.end();
         })();
-        con.release();
-    });
 }
 
 function setMemberRoles(member, roles) {
@@ -198,7 +193,7 @@ const m = new CronJob({
 const n = new CronJob({
     cronTime: '00 30 8 * * 1-5',
     onTick: function() {
-        pool.getConnection(function(err, con) {
+        var con = mysql.createConnection(mysqlConfig);
             con.query("SELECT * FROM statistics WHERE identifier = 'daysSinceGmbhLoginCredentialsCall' LIMIT 1", function (err, rows, fields) {
                 if ((rows[0].value + 1) === 1) {
                     client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' day since the last call asking for backend login credentials!');
@@ -206,9 +201,8 @@ const n = new CronJob({
                     client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' days since the last call asking for backend login credentials!');
                 }
                 con.query("UPDATE statistics SET value = value + 1 WHERE identifier = 'daysSinceGmbhLoginCredentialsCall'");
+                con.end();
             });
-            con.release();
-        });
     },
     start: true,
     timeZone: 'Europe/Berlin'
