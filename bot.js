@@ -67,14 +67,14 @@ fs.readdir("./commands/", (err, files) => {
 
 function fetchRssFeed(url, source, boot = false) {
     let parser = new Parser();
-    var con = mysql.createConnection(mysqlConfig);
     (async () => {
         let feed = await parser.parseURL(url);
 
         feed.items.forEach(item => {
-
+            const con = mysql.createConnection(mysqlConfig);
             con.query("SELECT * FROM typo3_blogs WHERE title = " + mysql.escape(item.title) + " AND source = '" + source + "'", function (err, rows, fields) {
                 if (err) throw err;
+                con.end();
                 if (rows.length === 0) {
                     var arr = item.link.split('?');
                     arr = arr.map(function (val) {
@@ -95,8 +95,11 @@ function fetchRssFeed(url, source, boot = false) {
                         if (undefined === description) {
                             description = '';
                         }
-
-                        con.query("INSERT INTO typo3_blogs (title, url, image, description, created_at, source) VALUES (" + mysql.escape(item.title) + ", '" + arr[0] + "', '" + imageUrl + "', " + mysql.escape(description) + ", '" + item.isoDate + "', '" + source + "')");
+                        const con = mysql.createConnection(mysqlConfig);
+                        con.query("INSERT INTO typo3_blogs (title, url, image, description, created_at, source) VALUES (" + mysql.escape(item.title) + ", '" + arr[0] + "', '" + imageUrl + "', " + mysql.escape(description) + ", '" + item.isoDate + "', '" + source + "')", function (err, rows, fields) {
+                            if (err) throw err;
+                            con.end();
+                        });
                     });
 
                 }
@@ -110,12 +113,13 @@ function fetchRssFeed(url, source, boot = false) {
 function fetchStackOverflow() {
     let parser = new Parser();
     var now = new Date();
-    var con = mysql.createConnection(mysqlConfig);
     var latestPost = new Date();
     (async () => {
         let feed = await parser.parseURL('https://stackoverflow.com/feeds/tag/typo3');
 
+        const con = mysql.createConnection(mysqlConfig);
         con.query("SELECT * FROM schedule_last_run WHERE name = 'stackoverflow' LIMIT 1", function (err, rows, fields) {
+            con.end();
             var lastRun = new Date(Date.parse(rows[0].last_run));
             latestPost = lastRun;
             feed.items.forEach(item => {
@@ -144,7 +148,10 @@ function fetchStackOverflow() {
                         });
                         if (itemDate > latestPost) {
                             latestPost = itemDate;
-                            con.query("UPDATE schedule_last_run SET last_run = '" + itemDate.toISOString() + "' WHERE name = 'stackoverflow'");
+                            const con = mysql.createConnection(mysqlConfig);
+                            con.query("UPDATE schedule_last_run SET last_run = '" + itemDate.toISOString() + "' WHERE name = 'stackoverflow'", function (err, rows, fields) {
+                                con.end();
+                            });
                         }
                     }
 
@@ -152,7 +159,6 @@ function fetchStackOverflow() {
 
             });
         });
-        con.end();
     })();
 }
 
@@ -193,15 +199,16 @@ const m = new CronJob({
 const n = new CronJob({
     cronTime: '00 30 8 * * 1-5',
     onTick: function () {
-        var con = mysql.createConnection(mysqlConfig);
+        const con = mysql.createConnection(mysqlConfig);
         con.query("SELECT * FROM statistics WHERE identifier = 'daysSinceGmbhLoginCredentialsCall' LIMIT 1", function (err, rows, fields) {
             if ((rows[0].value + 1) === 1) {
                 client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' day since the last call asking for backend login credentials!');
             } else {
                 client.channels.get(config.generalChannelGmbh).send('It has been ' + (rows[0].value + 1) + ' days since the last call asking for backend login credentials!');
             }
-            con.query("UPDATE statistics SET value = value + 1 WHERE identifier = 'daysSinceGmbhLoginCredentialsCall'");
-            con.end();
+            con.query("UPDATE statistics SET value = value + 1 WHERE identifier = 'daysSinceGmbhLoginCredentialsCall'", function (err, rows, fields) {
+                con.end();
+            });
         });
     },
     start: true,

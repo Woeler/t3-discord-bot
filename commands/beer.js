@@ -22,7 +22,6 @@ exports.run = (client, message, args) => {
             }
             message.channel.send(message.author.toString() + " you have a total of " + rows[0].beer_count + " beers.");
             con.end();
-            return;
         });
         return;
     }
@@ -36,8 +35,8 @@ exports.run = (client, message, args) => {
                 }
             }
             message.channel.send(str);
+            con.end();
         });
-        con.end();
         return;
     }
 

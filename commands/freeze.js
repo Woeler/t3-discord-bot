@@ -1,7 +1,7 @@
 exports.run = (client, message, args) => {
     var allowed = ['feature', 'merge'];
     var allowedStates = ['true', 'false'];
-    
+
     if (!message.member.roles.has(client.config.roleCoreTeam)) {
         message.channel.send(message.author.toString() + " you are not a core team member.");
         return;
@@ -35,8 +35,8 @@ exports.run = (client, message, args) => {
     };
     var con = mysql.createConnection(mysqlConfig);
 
-        con.query("UPDATE freezes SET status = " + state + " WHERE name = " + client.con.escape(type));
-        con.end();
+    con.query("UPDATE freezes SET status = " + state + " WHERE name = " + client.con.escape(type));
+    con.end();
 
     message.channel.send(message.author.toString() + " you have turned " + stateString + " " + type + " freeze.");
 };

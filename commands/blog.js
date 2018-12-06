@@ -19,6 +19,7 @@ exports.run = (client, message, args) => {
     var con = mysql.createConnection(mysqlConfig);
 
     con.query(q, function (err, rows, fields) {
+        con.end();
         if (rows.length === 0) {
             message.channel.send(message.author.toString() + " sorry, I couldn't find a blog for you.");
             return;
@@ -44,6 +45,5 @@ exports.run = (client, message, args) => {
                 }
             });
         }
-        con.end();
     });
 };
