@@ -106,7 +106,6 @@ function fetchRssFeed(url, source, boot = false) {
             });
 
         });
-        con.end();
     })();
 }
 
